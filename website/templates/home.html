@@ -3,11 +3,38 @@
 {% block title %}Market Dashboard{% endblock %}
 
 {% block content %}
+<style>
+.navbar .nav-link {
+  color: rgba(0, 0, 0, 0.9) !important;
+  font-weight: 500;
+  padding: 10px 15px;
+  border-radius: 8px;
+  transition: all 0.3s;
+}
+.navbar .nav-link:hover {
+  transform: scale(1.3);
+  color: rgba(0, 0, 0, 0.9) !important;  /* Keep the same color on hover */
+  background-color: transparent !important; /* Remove any background */
+}
+.navbar-brand {
+  color: rgb(100, 100, 100) !important;
+  font-weight: 600;
+}
+
+.navbar {
+        transition: transform 0.3s ease-in-out;
+    }
+    
+.navbar.hide {
+        transform: translateY(-100%);
+    }
+
+</style>
 <div class="container-fluid">
   <div class="row mb-4">
     <!-- NIFTY 50 -->
     <div class="col-md-3">
-      <div class="card market-card bg-primary text-white animate__animated animate__fadeInUp">
+      <div class="card market-card bg-primary text-white animate_animated animate_fadeInUp">
         <div class="card-body">
           <h5 class="card-title">NIFTY 50</h5>
           {% if market_data.NIFTY_50 %}
@@ -28,7 +55,7 @@
 
     <!-- BANK NIFTY -->
     <div class="col-md-3">
-      <div class="card market-card bg-warning text-dark animate__animated animate__fadeInUp" style="animation-delay: 0.1s">
+      <div class="card market-card bg-warning text-dark animate_animated animate_fadeInUp" style="animation-delay: 0.1s">
         <div class="card-body">
           <h5 class="card-title">BANK NIFTY</h5>
           {% if market_data.BANK_NIFTY %}
@@ -49,7 +76,7 @@
 
     <!-- NIFTY IT -->
     <div class="col-md-3">
-      <div class="card market-card bg-success text-white animate__animated animate__fadeInUp" style="animation-delay: 0.2s">
+      <div class="card market-card bg-success text-white animate_animated animate_fadeInUp" style="animation-delay: 0.2s">
         <div class="card-body">
           <h5 class="card-title">NIFTY IT</h5>
           {% if market_data.NIFTY_IT %}
@@ -70,7 +97,7 @@
 
     <!-- Market Status -->
     <div class="col-md-3">
-      <div class="card market-card bg-info text-white animate__animated animate__fadeInUp" style="animation-delay: 0.3s">
+      <div class="card market-card bg-info text-white animate_animated animate_fadeInUp" style="animation-delay: 0.3s">
         <div class="card-body">
           <h5 class="card-title">Market Status</h5>
           <h2 class="card-text">Live</h2>
@@ -83,7 +110,7 @@
 
 <div class="row mt-4">
     <div class="col-12">
-      <div class="card shadow-sm animate__animated animate__fadeInUp">
+      <div class="card shadow-sm animate_animated animate_fadeInUp">
         <div class="card-header bg-dark text-white">
           <h5 class="mb-0">📢News Station - Get latest news regarding the stock market</h5>
         </div>
@@ -104,5 +131,29 @@
       </div>
     </div>
   </div>
-  
+  <script>
+    let lastScroll = 0;
+    const navbar = document.querySelector('.navbar');
+    const scrollThreshold = 100; // Adjust this value to control when the navbar hides
+
+    window.addEventListener('scroll', () => {
+        const currentScroll = window.pageYOffset;
+        
+        if (currentScroll <= 0) {
+            // At top of page, always show navbar
+            navbar.classList.remove('hide');
+            return;
+        }
+        
+        if (currentScroll > lastScroll && currentScroll > scrollThreshold) {
+            // Scrolling down past threshold - hide navbar
+            navbar.classList.add('hide');
+        } else if (currentScroll < lastScroll) {
+            // Scrolling up - show navbar
+            navbar.classList.remove('hide');
+        }
+        
+        lastScroll = currentScroll;
+    });
+</script> 
 {% endblock %}
