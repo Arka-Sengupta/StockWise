@@ -1,0 +1,817 @@
+{% extends "base.html" %}
+
+{% block title %}Market Comparison{% endblock %}
+
+{% block content %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>India Stock Price Comparison</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <style>
+        :root {
+    --primary-color: #1e40af;
+    --secondary-color: #3b82f6;
+    --accent-color: #60a5fa;
+    --background-color: #f8fafc;
+    --card-background: #ffffff;
+    --text-color: #1e293b;
+    --text-light: #64748b;
+    --success-color: #10b981;
+    --danger-color: #ef4444;
+    --border-color: #e2e8f0;
+    --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: var(--background-color);
+    color: var(--text-color);
+    line-height: 1.6;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+header {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+header h1 {
+    color: var(--primary-color);
+    margin-bottom: 10px;
+}
+
+header p {
+    color: var(--text-light);
+}
+
+.search-container {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 30px;
+}
+
+#stockSearch {
+    padding: 12px 15px;
+    width: 300px;
+    border: 1px solid var(--border-color);
+    border-radius: 4px 0 0 4px;
+    font-size: 16px;
+}
+
+#searchBtn {
+    padding: 12px 20px;
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: 0 4px 4px 0;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s;
+}
+
+#searchBtn:hover {
+    background-color: var(--secondary-color);
+}
+
+.loading, .error {
+    display: none;
+    text-align: center;
+    margin: 50px 0;
+}
+
+.spinner {
+    border: 4px solid rgba(0, 0, 0, 0.1);
+    border-radius: 50%;
+    border-top: 4px solid var(--primary-color);
+    width: 40px;
+    height: 40px;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 20px;
+}
+
+.spinner.small {
+    width: 20px;
+    height: 20px;
+    margin-bottom: 10px;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.content {
+    display: none;
+}
+
+.stock-info {
+    background-color: var(--card-background);
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 30px;
+    box-shadow: var(--shadow);
+}
+
+.stock-info h2 {
+    margin-bottom: 20px;
+    color: var(--primary-color);
+    text-align: center;
+}
+
+.exchange-prices {
+    display: flex;
+    justify-content: space-around;
+    margin-bottom: 20px;
+}
+
+.price-card {
+    text-align: center;
+    padding: 15px;
+    border-radius: 8px;
+    width: 45%;
+}
+
+.price-card.nse {
+    background-color: rgba(59, 130, 246, 0.1);
+}
+
+.price-card.bse {
+    background-color: rgba(96, 165, 250, 0.1);
+}
+
+.price-card h3 {
+    margin-bottom: 10px;
+    color: var(--primary-color);
+}
+
+.price {
+    font-size: 24px;
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.change {
+    font-size: 16px;
+}
+
+.price-difference {
+    text-align: center;
+    margin-top: 20px;
+    padding: 15px;
+    border-top: 1px solid var(--border-color);
+}
+
+.price-difference h3 {
+    margin-bottom: 10px;
+    color: var(--primary-color);
+}
+
+.recommendation {
+    margin-top: 10px;
+    font-weight: bold;
+    padding: 8px;
+    border-radius: 4px;
+    display: inline-block;
+}
+
+.charts-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+.chart-wrapper {
+    background-color: var(--card-background);
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: var(--shadow);
+    flex: 1 1 calc(50% - 10px);
+    height: 500px;
+    min-width: 300px;
+}
+
+.chart-wrapper h3 {
+    margin-bottom: 15px;
+    color: var(--primary-color);
+    text-align: center;
+}
+
+.analysis-container {
+    background-color: var(--card-background);
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: var(--shadow);
+    margin-bottom: 30px;
+}
+
+.analysis-container h3 {
+    margin-bottom: 15px;
+    color: var(--primary-color);
+    text-align: center;
+}
+
+.analysis-loading {
+    display: none;
+    text-align: center;
+    margin: 20px 0;
+}
+
+.analysis-report {
+    line-height: 1.8;
+}
+
+.analysis-report h4 {
+    margin: 15px 0 10px;
+    color: var(--secondary-color);
+}
+
+.analysis-report ul {
+    margin-left: 20px;
+    margin-bottom: 15px;
+}
+
+footer {
+    text-align: center;
+    margin-top: 50px;
+    color: var(--text-light);
+    font-size: 14px;
+}
+
+@media (max-width: 768px) {
+    .exchange-prices {
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .price-card {
+        width: 100%;
+        margin-bottom: 15px;
+    }
+    
+    .charts-container {
+        flex-direction: column;
+    }
+    
+    .chart-wrapper {
+        width: 100%;
+    }
+    
+    #stockSearch {
+        width: 200px;
+    }
+}
+    </style>
+    <div class="container">
+        <header>
+            <h1>India Stock Price Comparison</h1>
+            <p>Compare stock prices between NSE and BSE exchanges</p>
+        </header>
+
+        <div class="search-container">
+            <input type="text" id="stockSearch" placeholder="Enter stock symbol (e.g., RELIANCE, TCS, INFY)">
+            <button id="searchBtn">Search</button>
+        </div>
+
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p>Loading data...</p>
+        </div>
+
+        <div class="content" id="content">
+            <div class="stock-info" id="stockInfo">
+                <h2 id="stockName">Stock Name</h2>
+                <div class="exchange-prices">
+                    <div class="price-card nse">
+                        <h3>NSE</h3>
+                        <p class="price" id="nsePrice">₹0.00</p>
+                        <p class="change" id="nseChange">0.00 (0.00%)</p>
+                    </div>
+                    <div class="price-card bse">
+                        <h3>BSE</h3>
+                        <p class="price" id="bsePrice">₹0.00</p>
+                        <p class="change" id="bseChange">0.00 (0.00%)</p>
+                    </div>
+                </div>
+                <div class="price-difference">
+                    <h3>Price Difference</h3>
+                    <p id="priceDiff">₹0.00 (0.00%)</p>
+                    <p id="recommendation" class="recommendation">No recommendation available</p>
+                </div>
+            </div>
+
+            <div class="charts-container">
+                <div class="chart-wrapper">
+                    <h3>Price Comparison</h3>
+                    <canvas id="priceChart"></canvas>
+                </div>
+                <div class="chart-wrapper">
+                    <h3>Historical Price Difference</h3>
+                    <canvas id="diffChart"></canvas>
+                </div>
+            </div>
+
+            <div class="analysis-container">
+                <h3>AI Analysis Report</h3>
+                <div id="analysisLoading" class="analysis-loading">
+                    <div class="spinner small"></div>
+                    <p>Generating analysis...</p>
+                </div>
+                <div id="analysisReport" class="analysis-report"></div>
+            </div>
+        </div>
+
+        <div class="error" id="error">
+            <p>Error loading stock data. Please try another stock symbol.</p>
+        </div>
+
+        <footer>
+            <p>Data is for demonstration purposes only. Not financial advice.</p>
+        </footer>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+    // DOM elements
+    const searchBtn = document.getElementById('searchBtn');
+    const stockSearch = document.getElementById('stockSearch');
+    const loading = document.getElementById('loading');
+    const content = document.getElementById('content');
+    const error = document.getElementById('error');
+    const stockName = document.getElementById('stockName');
+    const nsePrice = document.getElementById('nsePrice');
+    const bsePrice = document.getElementById('bsePrice');
+    const nseChange = document.getElementById('nseChange');
+    const bseChange = document.getElementById('bseChange');
+    const priceDiff = document.getElementById('priceDiff');
+    const recommendation = document.getElementById('recommendation');
+    const analysisLoading = document.getElementById('analysisLoading');
+    const analysisReport = document.getElementById('analysisReport');
+    
+    // Chart instances
+    let priceChart = null;
+    let diffChart = null;
+    
+    // Sample stock data (in a real app, this would come from an API)
+    const stocksData = {
+        'RELIANCE': {
+            name: 'Reliance Industries Ltd.',
+            data: generateStockData(2200, 2190, 30)
+        },
+        'TCS': {
+            name: 'Tata Consultancy Services Ltd.',
+            data: generateStockData(3500, 3490, 30)
+        },
+        'INFY': {
+            name: 'Infosys Ltd.',
+            data: generateStockData(1500, 1495, 30)
+        },
+        'HDFCBANK': {
+            name: 'HDFC Bank Ltd.',
+            data: generateStockData(1600, 1595, 30)
+        },
+        'ICICIBANK': {
+            name: 'ICICI Bank Ltd.',
+            data: generateStockData(950, 945, 30)
+        },
+        'HINDUNILVR': {
+            name: 'Hindustan Unilever Ltd.',
+            data: generateStockData(2400, 2390, 30)
+        },
+        'SBIN': {
+            name: 'State Bank of India',
+            data: generateStockData(550, 548, 30)
+        },
+        'BHARTIARTL': {
+            name: 'Bharti Airtel Ltd.',
+            data: generateStockData(850, 845, 30)
+        },
+        'ITC': {
+            name: 'ITC Ltd.',
+            data: generateStockData(420, 418, 30)
+        },
+        'KOTAKBANK': {
+            name: 'Kotak Mahindra Bank Ltd.',
+            data: generateStockData(1800, 1795, 30)
+        },
+        'ACC': {
+            name: 'ACC Ltd.',
+            data: generateStockData(2100, 2095, 30)
+        },
+        'NIFTY50': {
+        name: 'NIFTY 50 Index',
+        data: generateStockData(22000, 21950, 30) // Higher base price for indices
+    },
+    'SENSEX': {
+        name: 'S&P BSE SENSEX',
+        data: generateStockData(73000, 72900, 30) // Higher base price for SENSEX
+    },
+    'NIFTYBANK': {
+        name: 'NIFTY Bank Index',
+        data: generateStockData(48000, 47900, 30) // Higher base price for Bank Nifty
+    },
+    'NIFTY100': {
+        name: 'NIFTY 100 Index',
+        data: generateStockData(23000, 22950, 30) // Higher base price for NIFTY 100
+    }
+    };
+    
+    // Search button click event
+    searchBtn.addEventListener('click', searchStock);
+    
+    // Enter key press event
+    stockSearch.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            searchStock();
+        }
+    });
+    
+    // Search stock function
+    function searchStock() {
+        const symbol = stockSearch.value.trim().toUpperCase();
+        
+        if (!symbol) {
+            alert('Please enter a stock symbol');
+            return;
+        }
+        
+        // Show loading
+        loading.style.display = 'block';
+        content.style.display = 'none';
+        error.style.display = 'none';
+        
+        // Simulate API call delay
+        setTimeout(() => {
+            if (stocksData[symbol]) {
+                displayStockData(symbol, stocksData[symbol]);
+            } else {
+                loading.style.display = 'none';
+                error.style.display = 'block';
+            }
+        }, 1500);
+    }
+    
+    // Display stock data
+    function displayStockData(symbol, stockData) {
+        // Update stock info
+        stockName.textContent = `${stockData.name} (${symbol})`;
+        
+        const latestData = stockData.data[stockData.data.length - 1];
+        
+        nsePrice.textContent = `₹${latestData.nsePrice.toFixed(2)}`;
+        bsePrice.textContent = `₹${latestData.bsePrice.toFixed(2)}`;
+        
+        const nseChangeValue = latestData.nsePrice - stockData.data[stockData.data.length - 2].nsePrice;
+        const nseChangePercent = (nseChangeValue / stockData.data[stockData.data.length - 2].nsePrice) * 100;
+        
+        const bseChangeValue = latestData.bsePrice - stockData.data[stockData.data.length - 2].bsePrice;
+        const bseChangePercent = (bseChangeValue / stockData.data[stockData.data.length - 2].bsePrice) * 100;
+        
+        nseChange.textContent = `${nseChangeValue.toFixed(2)} (${nseChangePercent.toFixed(2)}%)`;
+        nseChange.style.color = nseChangeValue >= 0 ? 'var(--success-color)' : 'var(--danger-color)';
+        
+        bseChange.textContent = `${bseChangeValue.toFixed(2)} (${bseChangePercent.toFixed(2)}%)`;
+        bseChange.style.color = bseChangeValue >= 0 ? 'var(--success-color)' : 'var(--danger-color)';
+        
+        // Calculate price difference
+        const priceDifference = latestData.nsePrice - latestData.bsePrice;
+        const priceDiffPercent = (priceDifference / latestData.bsePrice) * 100;
+        
+        priceDiff.textContent = `₹${Math.abs(priceDifference).toFixed(2)} (${Math.abs(priceDiffPercent).toFixed(2)}%)`;
+        
+        // Generate recommendation
+        if (Math.abs(priceDiffPercent) < 0.1) {
+            recommendation.textContent = 'No significant price difference between exchanges';
+            recommendation.style.backgroundColor = '#e2e8f0';
+            recommendation.style.color = '#1e293b';
+        } else if (priceDifference > 0) {
+            recommendation.textContent = 'Consider buying on BSE (lower price)';
+            recommendation.style.backgroundColor = '#10b981';
+            recommendation.style.color = 'white';
+        } else {
+            recommendation.textContent = 'Consider buying on NSE (lower price)';
+            recommendation.style.backgroundColor = '#10b981';
+            recommendation.style.color = 'white';
+        }
+        
+        // Create charts
+        createPriceChart(stockData.data);
+        createDiffChart(stockData.data);
+        
+        // Generate AI analysis
+        generateAnalysis(symbol, stockData);
+        
+        // Show content
+        loading.style.display = 'none';
+        content.style.display = 'block';
+    }
+    
+    // Create price comparison chart
+    function createPriceChart(data) {
+        const ctx = document.getElementById('priceChart').getContext('2d');
+        
+        // Destroy existing chart if it exists
+        if (priceChart) {
+            priceChart.destroy();
+        }
+        
+        const labels = data.map(item => item.date);
+        const nsePrices = data.map(item => item.nsePrice);
+        const bsePrices = data.map(item => item.bsePrice);
+        
+        priceChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [
+                    {
+                        label: 'NSE Price',
+                        data: nsePrices,
+                        borderColor: '#3b82f6',
+                        backgroundColor: 'rgba(0, 0, 0, 0.1)',
+                        tension: 0.1,
+                        pointRadius: 2,
+                        pointHoverRadius: 5
+                    },
+                    {
+                        label: 'BSE Price',
+                        data: bsePrices,
+                        borderColor: '#60a5fa',
+                        backgroundColor: 'rgba(96, 165, 250, 0.1)',
+                        tension: 0.1,
+                        pointRadius: 2,
+                        pointHoverRadius: 5
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                    },
+                    tooltip: {
+                        mode: 'index',
+                        intersect: false,
+                        callbacks: {
+                            label: function(context) {
+                                return context.dataset.label + ': ₹' + context.raw.toFixed(2);
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        ticks: {
+                            callback: function(value) {
+                                return '₹' + value;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    }
+    
+    // Create price difference chart
+    function createDiffChart(data) {
+        const ctx = document.getElementById('diffChart').getContext('2d');
+        
+        // Destroy existing chart if it exists
+        if (diffChart) {
+            diffChart.destroy();
+        }
+        
+        const labels = data.map(item => item.date);
+        const priceDiffs = data.map(item => item.nsePrice - item.bsePrice);
+        
+        diffChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [
+                    {
+                        label: 'NSE-BSE Price Difference',
+                        data: priceDiffs,
+                        backgroundColor: function(context) {
+                            const value = context.dataset.data[context.dataIndex];
+                            return value >= 0 ? 'rgba(16, 185, 129, 0.7)' : 'rgba(239, 68, 68, 0.7)';
+                        },
+                        borderColor: function(context) {
+                            const value = context.dataset.data[context.dataIndex];
+                            return value >= 0 ? 'rgb(16, 185, 129)' : 'rgb(239, 68, 68)';
+                        },
+                        borderWidth: 1
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return 'Difference: ₹' + context.raw.toFixed(2);
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        ticks: {
+                            callback: function(value) {
+                                return '₹' + value;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    }
+    
+    // Generate AI analysis using OpenRouter DeepSeek R1 API
+    async function generateAnalysis(symbol, stockData) {
+        // Show loading
+        analysisLoading.style.display = 'block';
+        analysisReport.innerHTML = '';
+        
+        try {
+            // Prepare data for the AI
+            const latestData = stockData.data[stockData.data.length - 1];
+            const priceDifference = latestData.nsePrice - latestData.bsePrice;
+            const priceDiffPercent = (priceDifference / latestData.bsePrice) * 100;
+            
+            // Calculate some basic statistics
+            const nsePrices = stockData.data.map(item => item.nsePrice);
+            const bsePrices = stockData.data.map(item => item.bsePrice);
+            const nseMean = nsePrices.reduce((a, b) => a + b, 0) / nsePrices.length;
+            const bseMean = bsePrices.reduce((a, b) => a + b, 0) / bsePrices.length;
+            const nseVolatility = calculateVolatility(nsePrices);
+            const bseVolatility = calculateVolatility(bsePrices);
+            
+            // Prepare prompt for the AI
+            const prompt = `
+                You are a financial analyst specializing in Indian stock markets. Analyze the following data for ${stockData.name} (${symbol}):
+                
+                Current NSE Price: ₹${latestData.nsePrice.toFixed(2)}
+                Current BSE Price: ₹${latestData.bsePrice.toFixed(2)}
+                Price Difference: ₹${Math.abs(priceDifference).toFixed(2)} (${Math.abs(priceDiffPercent).toFixed(2)}%)
+                NSE 30-day Average: ₹${nseMean.toFixed(2)}
+                BSE 30-day Average: ₹${bseMean.toFixed(2)}
+                NSE Volatility: ${nseVolatility.toFixed(4)}
+                BSE Volatility: ${bseVolatility.toFixed(4)}
+                
+                Provide a concise analysis with the following sections:
+                1. Market Overview: Brief overview of the stock's performance
+                2. Exchange Comparison: Analysis of price differences between NSE and BSE
+                3. Recommendation: Where should investors consider buying this stock and why
+                4. Risk Assessment: Brief mention of potential risks
+                
+                Keep your response under 400 words and format it in HTML with h4 tags for section headers.
+            `;
+            
+            // Call OpenRouter API with DeepSeek R1 model
+            const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${process.env.OPENROUTER_API_KEY}`,
+                    'HTTP-Referer': window.location.href,
+                    'X-Title': 'India Stock Price Comparison'
+                },
+                body: JSON.stringify({
+                    model: 'deepseek/deepseek-coder-v2',
+                    messages: [
+                        {
+                            role: 'user',
+                            content: prompt
+                        }
+                    ],
+                    temperature: 0.7,
+                    max_tokens: 1000
+                })
+            });
+            
+            const data = await response.json();
+            
+            if (data.choices && data.choices[0] && data.choices[0].message) {
+                analysisReport.innerHTML = data.choices[0].message.content;
+            } else {
+                // Fallback if API fails
+                analysisReport.innerHTML = generateFallbackAnalysis(symbol, stockData);
+            }
+        } catch (error) {
+            console.error('Error generating analysis:', error);
+            // Fallback if API fails
+            analysisReport.innerHTML = generateFallbackAnalysis(symbol, stockData);
+        } finally {
+            // Hide loading
+            analysisLoading.style.display = 'none';
+        }
+    }
+    
+    // Generate fallback analysis if API fails
+    function generateFallbackAnalysis(symbol, stockData) {
+        const latestData = stockData.data[stockData.data.length - 1];
+        const priceDifference = latestData.nsePrice - latestData.bsePrice;
+        const priceDiffPercent = (priceDifference / latestData.bsePrice) * 100;
+        
+        let exchangeRecommendation = '';
+        if (Math.abs(priceDiffPercent) < 0.1) {
+            exchangeRecommendation = 'Both exchanges offer similar prices, so investors can choose based on other factors like transaction costs or convenience.';
+        } else if (priceDifference > 0) {
+            exchangeRecommendation = 'BSE currently offers a lower price, which may be advantageous for buyers looking to optimize entry points.';
+        } else {
+            exchangeRecommendation = 'NSE currently offers a lower price, which may be advantageous for buyers looking to optimize entry points.';
+        }
+        
+        return `
+            <h4>Market Overview</h4>
+            <p>${stockData.name} (${symbol}) is currently trading at ₹${latestData.nsePrice.toFixed(2)} on NSE and ₹${latestData.bsePrice.toFixed(2)} on BSE. The stock has shown moderate volatility over the past month, with price movements reflecting broader market trends.</p>
+            
+            <h4>Exchange Comparison</h4>
+            <p>There is a price difference of ₹${Math.abs(priceDifference).toFixed(2)} (${Math.abs(priceDiffPercent).toFixed(2)}%) between NSE and BSE. This difference is ${Math.abs(priceDiffPercent) > 0.5 ? 'significant' : 'relatively small'} and may present arbitrage opportunities for institutional investors.</p>
+            
+            <h4>Recommendation</h4>
+            <p>${exchangeRecommendation} However, investors should consider other factors beyond just price, including liquidity, trading volumes, and transaction costs.</p>
+            
+            <h4>Risk Assessment</h4>
+            <p>As with all equity investments, ${symbol} carries market risk and is subject to both company-specific factors and broader economic conditions. Investors should conduct thorough research and consider their risk tolerance before making investment decisions.</p>
+        `;
+    }
+    
+    // Helper function to calculate volatility
+    function calculateVolatility(prices) {
+        const mean = prices.reduce((a, b) => a + b, 0) / prices.length;
+        const squaredDiffs = prices.map(price => Math.pow(price - mean, 2));
+        const variance = squaredDiffs.reduce((a, b) => a + b, 0) / squaredDiffs.length;
+        return Math.sqrt(variance) / mean; // Coefficient of variation as a measure of volatility
+    }
+    
+    // Generate random stock data for demonstration
+    function generateStockData(baseNsePrice, baseBsePrice, days) {
+        const data = [];
+        const today = new Date();
+        
+        for (let i = days - 1; i >= 0; i--) {
+            const date = new Date(today);
+            date.setDate(today.getDate() - i);
+            
+            // Generate random price movements with some correlation between NSE and BSE
+            const commonFactor = (Math.random() - 0.5) * 0.02; // Common market movement
+            const nseSpecific = (Math.random() - 0.5) * 0.01; // NSE-specific movement
+            const bseSpecific = (Math.random() - 0.5) * 0.01; // BSE-specific movement
+            
+            // Calculate new prices with some persistence
+            const prevNsePrice = i < days - 1 ? data[data.length - 1].nsePrice : baseNsePrice;
+            const prevBsePrice = i < days - 1 ? data[data.length - 1].bsePrice : baseBsePrice;
+            
+            const nsePrice = prevNsePrice * (1 + commonFactor + nseSpecific);
+            const bsePrice = prevBsePrice * (1 + commonFactor + bseSpecific);
+            
+            data.push({
+                date: formatDate(date),
+                nsePrice: nsePrice,
+                bsePrice: bsePrice
+            });
+        }
+        
+        return data;
+    }
+    
+    // Format date as DD MMM
+    function formatDate(date) {
+        const day = date.getDate();
+        const month = date.toLocaleString('default', { month: 'short' });
+        return `${day} ${month}`;
+    }
+    
+    // Initialize with a default stock (optional)
+    // Uncomment the following line to load a default stock on page load
+    // setTimeout(() => { stockSearch.value = 'RELIANCE'; searchBtn.click(); }, 1000);
+});
+    </script>
+</body>
+</html>
+{% endblock %}
