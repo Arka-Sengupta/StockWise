@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+
+{% block title %}User Profile{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card shadow-sm border-0 animate__animated animate__fadeIn">
+            <div class="card-header bg-primary text-white">
+                <h3 class="mb-0">User Profile</h3>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="card note-card h-100">
+                            <div class="card-body">
+                                <h5 class="card-title">Account Details</h5>
+                                <p class="card-text">
+                                    <strong>Email:</strong> {{ current_user.email }}<br>
+                                    <strong>Name:</strong> {{ current_user.first_name }}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card note-card h-100">
+                            <div class="card-body">
+                                <h5 class="card-title">Account Actions</h5>
+                                <div class="d-grid gap-2">
+                                    <a href="#" class="btn btn-outline-primary">Edit Profile</a>
+                                    <a href="{{ url_for('auth.logout') }}" class="btn btn-outline-danger">Logout</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
