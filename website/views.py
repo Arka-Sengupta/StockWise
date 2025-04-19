@@ -74,3 +74,35 @@ def home():
 @login_required
 def compare_markets():
     return render_template("compare.html", user=current_user)
+
+from flask import request, jsonify
+from openai import OpenAI
+
+# Setup OpenRouter client
+client = OpenAI(
+    base_url="https://openrouter.ai/api/v1",
+    api_key="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"
+)
+
+@views.route('/mr-market', methods=['POST'])
+@login_required
+def mr_market():
+    user_msg = request.json.get("message")
+
+    try:
+        response = client.chat.completions.create(
+            extra_headers={
+                "HTTP-Referer": "https://yourdomain.com",  # optional
+                "X-Title": "StockWise"  # optional
+            },
+            model="nvidia/llama-3.3-nemotron-super-49b-v1:free",
+            messages=[
+                {"role": "system", "content": "You are Mr. Market, a helpful assistant specialized in the Indian stock market."},
+                {"role": "user", "content": user_msg}
+            ]
+        )
+        reply = response.choices[0].message.content
+        return jsonify({"reply": reply})
+    except Exception as e:
+        print("Chatbot error:", e)
+        return jsonify({"reply": "Sorry, Mr. Market is facing technical difficulties at the moment."}), 500
