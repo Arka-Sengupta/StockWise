@@ -61,7 +61,7 @@ python main.py
 | Role | Contributors |
 |----------|----------|
 | 🧠 Frontend & Backend | Arka Sengupta & Saurish Chandra |
-| 🎨 Graphics & UI Design | Shaurya Singh & Abhay Kumar |
+| 🎨 Graphics & UI Design | Saurish Chandra & Arka Sengupta |
 
 
 ---
