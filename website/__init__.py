@@ -10,6 +10,7 @@ def create_app():
     app.config['SECRET_KEY'] = 'your-secret-key-here'  # Change this to a random secret key
     app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{DB_NAME}'
     app.config['ALPHA_VANTAGE_API_KEY'] = 'IYFQ745NTX8Y65ES'  # You'll set this
+
     db.init_app(app)
 
     from .views import views
@@ -24,7 +25,7 @@ def create_app():
         db.create_all()
 
     login_manager = LoginManager()
-    login_manager.login_view = 'auth.login'
+    login_manager.login_view = 'views.intro'
     login_manager.init_app(app)
 
     @login_manager.user_loader

@@ -326,65 +326,69 @@ body.auth-page .background-image {
   {% endif %}
 </div>
   
-  <!-- Navigation -->
-  <nav class="navbar navbar-expand-lg navbar-light fixed-top {% if request.endpoint in ['auth.login', 'auth.sign_up'] %}auth-page-navbar{% endif %}">
-    <div class="container">
-      <a class="navbar-brand animate__animated animate__fadeInLeft" href="/">
-        <i class="fas fa-chart-line me-2"></i>StockWise
-      </a>
-      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-        <span class="navbar-toggler-icon"></span>
-      </button>
-      <div class="collapse navbar-collapse" id="navbarNav">
-        <ul class="navbar-nav ms-auto">
-          {% if current_user.is_authenticated %}
-          <li class="nav-item animate__animated animate__fadeInDown">
-            <a class="nav-link" href="/"><i class="fas fa-home me-1"></i> Dashboard</a>
-          </li>
-          <li class="nav-item animate__animated animate__fadeInDown">
-            <a class="nav-link" href="/user-details"><i class="fas fa-user me-1"></i> Account</a>
-          </li>
-          <li class="nav-item animate__animated animate__fadeInDown">
-            <a class="nav-link" href="/compare-markets"><i class="fas fa-balance-scale me-1"></i> Compare</a>
-          </li>
-          <li class="nav-item animate__animated animate__fadeInDown">
-            <a class="nav-link" href="/logout"><i class="fas fa-sign-out-alt me-1"></i> Logout</a>
-          </li>
-          {% else %}
-          <li class="nav-item animate__animated animate__fadeInDown">
-            <a class="nav-link" href="/login"><i class="fas fa-sign-in-alt me-1"></i> Login</a>
-          </li>
-          <li class="nav-item animate__animated animate__fadeInDown">
-            <a class="nav-link" href="/sign-up"><i class="fas fa-user-plus me-1"></i> Sign Up</a>
-          </li>
-          {% endif %}
-        </ul>
-      </div>
+ <!-- Navigation -->
+<nav class="navbar navbar-expand-lg navbar-light fixed-top {% if request.endpoint in ['auth.login', 'auth.sign_up', 'views.intro'] %}auth-page-navbar{% endif %}">
+  <div class="container">
+    <a class="navbar-brand animate__animated animate__fadeInLeft" href="{{ url_for('views.intro') }}">
+      <i class="fas fa-chart-line me-2"></i>StockWise
+    </a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNav">
+      <ul class="navbar-nav ms-auto">
+        {% if current_user.is_authenticated %}
+        <li class="nav-item animate__animated animate__fadeInDown">
+          <a class="nav-link" href="{{ url_for('views.home') }}"><i class="fas fa-home me-1"></i> Dashboard</a>
+        </li>
+        <li class="nav-item animate__animated animate__fadeInDown">
+          <a class="nav-link" href="{{ url_for('views.user_details') }}"><i class="fas fa-user me-1"></i> Account</a>
+        </li>
+        <li class="nav-item animate__animated animate__fadeInDown">
+          <a class="nav-link" href="{{ url_for('views.compare_markets') }}"><i class="fas fa-balance-scale me-1"></i> Compare</a>
+        </li>
+        <li class="nav-item animate__animated animate__fadeInDown">
+          <a class="nav-link" href="{{ url_for('auth.logout') }}"><i class="fas fa-sign-out-alt me-1"></i> Logout</a>
+        </li>
+        {% else %}
+        <li class="nav-item animate__animated animate__fadeInDown">
+          <a class="nav-link" href="{{ url_for('views.intro') }}"><i class="fas fa-home me-1"></i> Home</a>
+        </li>
+        <li class="nav-item animate__animated animate__fadeInDown">
+          <a class="nav-link" href="{{ url_for('auth.login') }}"><i class="fas fa-sign-in-alt me-1"></i> Login</a>
+        </li>
+        <li class="nav-item animate__animated animate__fadeInDown">
+          <a class="nav-link" href="{{ url_for('auth.sign_up') }}"><i class="fas fa-user-plus me-1"></i> Sign Up</a>
+        </li>
+        {% endif %}
+      </ul>
     </div>
-  </nav>
-
-  <!-- Flash Messages -->
-  <div class="container mt-3">
-    {% with messages = get_flashed_messages(with_categories=true) %}
-      {% if messages %}
-        {% for category, message in messages %}
-        <div class="alert alert-{{ 'danger' if category == 'error' else 'success' }} alert-dismissible fade show animate__animated animate__fadeInRight">
-          <div class="d-flex align-items-center">
-            <i class="fas {{ 'fa-times-circle' if category == 'error' else 'fa-check-circle' }} me-2"></i>
-            <div>{{ message }}</div>
-          </div>
-          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-        {% endfor %}
-      {% endif %}
-    {% endwith %}
   </div>
+</nav>
+
+<!-- Flash Messages -->
+<div class="container mt-3">
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      {% for category, message in messages %}
+      <div class="alert alert-{{ 'danger' if category == 'error' else 'success' }} alert-dismissible fade show animate__animated animate__fadeInRight">
+        <div class="d-flex align-items-center">
+          <i class="fas {{ 'fa-times-circle' if category == 'error' else 'fa-check-circle' }} me-2"></i>
+          <div>{{ message }}</div>
+        </div>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+      </div>
+      {% endfor %}
+    {% endif %}
+  {% endwith %}
+</div>
 
   <!-- Main Content -->
   <main class="container my-4">
     {% block content %}{% endblock %}
   </main>
 
+  {% if current_user.is_authenticated %}
   <!-- Chat Bubble -->
   <div id="chat-bubble" class="chat-bubble">
     <i class="fas fa-comment-dots me-2"></i>Ask Mr. Market
@@ -402,6 +406,8 @@ body.auth-page .background-image {
       <button type="submit"><i class="fas fa-paper-plane"></i></button>
     </form>
   </div>
+{% endif %}
+
 
   <!-- Bootstrap JS -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
