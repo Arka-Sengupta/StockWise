@@ -65,9 +65,6 @@ python main.py
 
 
 ---
-Sure! Here's a more polished and engaging version of the **Contributing** section, with clearer formatting and friendlier tone:
-
----
 
 ## 🤝 **Contributing**
 
