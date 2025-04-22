@@ -4,6 +4,21 @@
 
 {% block extra_styles %}
 <style>
+
+  /* welcome message */
+
+  .welcome-message {
+    color: white;
+    font-weight: 600;
+    margin-bottom: 1.5rem;
+    padding: 0.75rem 1.5rem;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border-radius: 10px;
+    display: inline-block;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+  }
+
   /* Market Cards Styling */
   .market-card {
     border-radius: 15px;
@@ -131,6 +146,13 @@
 
 {% block content %}
 <div class="container-fluid px-4">
+  <div class="row mb-3 animate__animated animate__fadeIn">
+    <div class="col-12">
+      <h2 class="welcome-message">
+         Welcome, {{ current_user.first_name }}
+      </h2>
+    </div>
+  </div>
   <!-- Main Market Cards -->
   <div class="row g-4 mb-2">
     <!-- NIFTY 50 -->
