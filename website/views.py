@@ -4,8 +4,19 @@ import requests
 from datetime import datetime
 from flask import request, jsonify
 from openai import OpenAI
+import os
+from dotenv import load_dotenv
+
+# Load environment variables
+load_dotenv()
 
 views = Blueprint('views', __name__)
+
+# OpenRouter client setup
+client = OpenAI(
+    base_url="https://openrouter.ai/api/v1",
+    api_key=os.getenv('OPENROUTER_API_KEY')
+)
 
 # Intro page route (unauthenticated)
 @views.route('/')
@@ -96,7 +107,7 @@ def get_nse_index_data(symbol):
     return mock_data.get(symbol, None)
 
 def fetch_stock_news():
-    api_key = "eda84e16e2da442eb1d883146df0e7c4"  # Change your API key
+    api_key = os.getenv('NEWS_API_KEY')
     url = f"https://newsapi.org/v2/everything?q=indian+stock+market&language=en&sortBy=publishedAt&apiKey={api_key}"
 
     try:
@@ -107,9 +118,3 @@ def fetch_stock_news():
     except Exception as e:
         current_app.logger.error(f"News API Error: {e}")
         return []
-
-# OpenRouter client setup
-client = OpenAI(
-    base_url="https://openrouter.ai/api/v1",
-    api_key="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"
-)
