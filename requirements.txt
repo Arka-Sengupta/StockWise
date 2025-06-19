@@ -6,3 +6,4 @@ requests
 openai
 Werkzeug
 gunicorn
+psycopg2-binary
