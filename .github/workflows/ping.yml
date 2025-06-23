@@ -10,5 +10,4 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Ping Render server
-        run: https://stockwise-24nq.onrender.com/
-          curl -sSf 
+        run: curl -sSf https://stockwise-24nq.onrender.com/ping
