@@ -8,11 +8,6 @@ load_dotenv()
 
 app = create_app()
 
-# Add a ping endpoint
-@app.route('/ping')
-def ping():
-    return 'pong', 200
-
 # Print the current SQLALCHEMY_DATABASE_URI for debugging
 print('SQLALCHEMY_DATABASE_URI:', app.config.get('SQLALCHEMY_DATABASE_URI'))
 
