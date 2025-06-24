@@ -37,11 +37,3 @@ def create_app():
     @login_manager.user_loader
     def load_user(id):
         return User.query.get(int(id))
-
-    # Add ping endpoint here so it's always available
-    @app.route('/ping')
-    def ping():
-        return 'pong', 200
-
-    return app
-
